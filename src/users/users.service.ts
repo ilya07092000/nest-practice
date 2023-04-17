@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { RolesService } from 'src/roles/roles.service';
 import { AddRoleDto } from './dto/add-role.dto';
+import { BanUserDto } from './dto/ban-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './users.model';
 
@@ -48,5 +49,18 @@ export class UsersService {
 
     await currUser.$add('role', role);
     return dto;
+  }
+
+  async ban(dto: BanUserDto) {
+    const currUser = await this.userRespository.findByPk(dto.userId);
+
+    if (!currUser) {
+      throw new BadRequestException({ message: 'User Does Not Exist' });
+    }
+
+    currUser.banned = true;
+    currUser.banReason = dto.banReason;
+    await currUser.save();
+    return currUser;
   }
 }
