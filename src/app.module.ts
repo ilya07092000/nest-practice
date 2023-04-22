@@ -10,6 +10,8 @@ import { AuthModule } from './auth/auth.module';
 import { PostsModule } from './posts/posts.module';
 import { Post } from './posts/posts.model';
 import { FilesModule } from './files/files.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -28,6 +30,9 @@ import { FilesModule } from './files/files.module';
       database: 'nest_practice',
       models: [User, Role, UserRoles, Post],
       autoLoadModels: true,
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, 'static'),
     }),
     UsersModule,
     RolesModule,
