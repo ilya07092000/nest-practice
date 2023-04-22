@@ -6,8 +6,11 @@ import {
   Param,
   Post,
   Request,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Roles } from 'src/auth/roles-auth.decorator';
@@ -21,9 +24,14 @@ export class PostsController {
   constructor(private postService: PostsService) {}
 
   @Post()
+  @UseInterceptors(FileInterceptor('image'))
   @UseGuards(JwtAuthGuard)
-  async create(@Request() req, @Body() dto: Omit<CreatePostDto, 'userId'>) {
-    const post: CreatePostDto = { ...dto, userId: req.user.id };
+  async create(
+    @Request() req,
+    @Body() dto: Omit<CreatePostDto, 'userId'>,
+    @UploadedFile() image,
+  ) {
+    const post: CreatePostDto = { ...dto, image, userId: req.user.id };
 
     return this.postService.createPost(post);
   }

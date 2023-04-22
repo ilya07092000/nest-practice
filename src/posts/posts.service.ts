@@ -5,6 +5,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import { FilesService } from 'src/files/files.service';
 import { User } from 'src/users/users.model';
 import { CreatePostDto } from './dto/create-post.dto';
 import { Post } from './posts.model';
@@ -14,16 +15,21 @@ export class PostsService {
   constructor(
     @InjectModel(Post) private postRepository: typeof Post,
     @InjectModel(User) private userRepository: typeof User,
+    private filesService: FilesService,
   ) {}
 
   async createPost(dto: CreatePostDto) {
+    const fileName = await this.filesService.createFile(dto?.image);
     const user = this.userRepository.findByPk(dto.userId);
 
     if (!user) {
       throw new BadRequestException({ message: 'User Does Not Exist' });
     }
 
-    const post = await this.postRepository.create(dto);
+    const post = await this.postRepository.create({
+      ...dto,
+      image: fileName || '',
+    });
     return post;
   }
 
